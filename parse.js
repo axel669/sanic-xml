@@ -1,10 +1,10 @@
 const xmlStructureRegexes = [
     /(?<prefix><\?xml)/g,
     /(?<prefix>\?>)/g,
-    /(?<prefix><)(?<tagOpen>\w+)/g,
-    /(?<prefix><\/)(?<tagClose>\w+)>/g,
+    /(?<prefix><)(?<tagOpen>[\w\-]+)/g,
+    /(?<prefix><\/)(?<tagClose>[\w\-]+)>/g,
     /(?<prefix>\/>)/g,
-    /(?<attrName>\w+)=(?<attrValue>"(?:.|\\")*?")/g,
+    /(?<attrName>[\w\-]+)=(?<attrValue>"(?:.|\\")*?")/g,
     /(?<!\?)(?<prefix>>)/g,
 ]
 
@@ -58,7 +58,9 @@ const process = (tag, stack, match) => {
         const { tagClose } = match.groups
 
         if (tagClose !== undefined && tagClose !== tag.tag) {
-            throw "mismatch close"
+            const line = match.input.slice(0, match.index).match(/^/gm).length
+            const msg = `Mismatch closing tag on line ${line} (${tagClose})`
+            throw new Error(msg)
         }
 
         if (stack.length === 0) {

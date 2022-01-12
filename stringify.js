@@ -8,6 +8,11 @@ const stringify = (js, options = {}, tab = 0) => {
     const {
         minify = false,
     } = options
+
+    if (Array.isArray(js) === false) {
+        throw new Error("JS data must be an array of xml nodes")
+    }
+
     const joinString = minstr(minify, "\n")
     const tabs = minstr(minify, "    ".repeat(tab))
 
