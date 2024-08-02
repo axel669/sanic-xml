@@ -55,4 +55,4 @@ const stringify = (js, options = {}, tab = 0) => {
     ).join(joinString)
 }
 
-module.exports = stringify
+export default { stringify }
