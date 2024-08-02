@@ -1,139 +1,141 @@
+import fs from "node:fs"
+
 const xmlStructureRegexes = [
-    /(?<prefix><\?xml)/g,
-    /(?<prefix>\?>)/g,
-    /(?<prefix><)(?<tagOpen>[\w\-]+)/g,
-    /(?<prefix><\/)(?<tagClose>[\w\-]+)>/g,
-    /(?<prefix>\/>)/g,
+    /(?<header><\?xml(.|\r|\n)*?\?>)/g,
+    /(?<comment><\!\-\-(.|\r|\n)*?\-\->)/g,
+    /(?<doctype><\!doctype(.|\r|\n)*?>)/g,
+    /(<)(?<tagOpen>[\w\-]+)/g,
+    /(<\/)(?<tagClose>[\w\-]+)>/g,
+    /(?<tagSelfClose>\/>)/g,
     /(?<attrName>[\w\-]+)=(?<attrValue>"(?:.|\\")*?")/g,
-    /(?<!\?)(?<prefix>>)/g,
+    /(?<![\?\-])(?<tagEnd>>)/g,
 ]
+const beeg = new RegExp(
+    `${xmlStructureRegexes.map(r => r.source).join("|")}`,
+    "gi"
+)
 
-const process = (tag, stack, match) => {
-    const { prefix } = match.groups
-
-    if (prefix === undefined) {
-        const { attrName, attrValue } = match.groups
-        tag.attr[attrName] = attrValue.slice(1, -1)
-
-        return [tag, stack, null]
+const addChild = (item, child) => {
+    const { "@attr": hasAttr, tag, __text, ...attrs } = child
+    const textValue = (__text !== "") ? { __text } : {}
+    const value = hasAttr ? { ...attrs, ...textValue } : (textValue.__text ?? "")
+    item["@attr"] = true
+    if (item[tag] === undefined) {
+        item[tag] = value
+        return
     }
-
-    if (prefix === "<?xml") {
-        return [
-            { header: true, attr: {} },
-            [],
-            null
-        ]
+    if (Array.isArray(item[tag]) === true) {
+        item[tag].push(value)
+        return
     }
-    if (prefix === "?>") {
-        if (tag.header !== true) {
-            throw "nope"
-        }
-        return [
-            null,
-            stack,
-            tag
-        ]
-    }
-
-    if (prefix === "<") {
-        const newTag = {
-            tag: match.groups.tagOpen,
-            children: [],
-            attr: {}
-        }
-        tag?.children?.push(newTag)
-
-        return [
-            newTag,
-            (tag === null)
-                ? stack
-                : [...stack, tag],
-            null
-        ]
-    }
-    if (prefix === ">") {
-    }
-    if (prefix === "</" || prefix === "/>") {
-        const { tagClose } = match.groups
-
-        if (tagClose !== undefined && tagClose !== tag.tag) {
-            const line = match.input.slice(0, match.index).match(/^/gm).length
-            const msg = `Mismatch closing tag on line ${line} (${tagClose})`
-            throw new Error(msg)
-        }
-
-        if (stack.length === 0) {
-            return [
-                null,
-                [],
-                tag
-            ]
-        }
-
-        return [
-            stack.slice(-1)[0],
-            stack.slice(0, -1),
-            null
-        ]
-    }
-
-    return [tag, stack, null]
+    item[tag] = [item[tag], value]
 }
-
-const parseXML = (xml) => {
-    const tokens = xmlStructureRegexes
-        .reduce(
-            (found, regex) => {
-                const matches = Array.from(
-                    xml.matchAll(regex)
-                )
-                return [...found, ...matches]
-            },
-            []
-        )
-        .sort((a, b) => a.index - b.index)
-
-    const root = []
-
-    let current = null
+const parser = () => {
+    let i = 0
+    let current = { __text: "" }
     let stack = []
-
-    tokens.forEach(
-        (match, index) => {
-            const next = tokens[index + 1]
-            const [$current, $stack, $push] = process(current, stack, match)
-
-            const isEnd = (
-                match.groups.prefix === ">"
-                || match.groups.prefix === "/>"
-            )
-            const nextIsStart = (
-                next !== undefined
-                && (
-                    next.groups.prefix === "<"
-                    || next.groups.prefix === "</"
-                )
-            )
-            if (isEnd === true && nextIsStart === true) {
-                const start = match.index + match[0].length
-                const end = next.index
-                const text = xml.substring(start, end).trim()
-
-                if (text !== "") {
-                    $current.children.push({ text })
-                }
-            }
-
-            current = $current
-            stack = $stack
-            if ($push !== null) {
-                root.push($push)
-            }
+    let remain = ""
+    let xml = ""
+    let seen = 0
+    const process = (match, end) => {
+        const token = match.groups
+        if (end === false && (match.index + match[0].length) === xml.length) {
+            return
         }
-    )
+        if (token.header !== undefined || token.comment !== undefined || token.doctype !== undefined) {
+            current.__text += xml.substring(i, match.index)
+            i = match.index + match[0].length
+            return
+        }
+        if (token.tagOpen !== undefined) {
+            current.__text += xml.substring(i, match.index)
+            stack.push(current)
+            current = {
+                tag: token.tagOpen,
+                __text: "",
+            }
+            i = match.index + match[0].length
+            return
+        }
+        if (token.tagEnd !== undefined) {
+            i = match.index + match[0].length
+            return
+        }
+        if (token.tagClose !== undefined) {
+            current.__text = (current.__text + xml.substring(i, match.index)).trim()
+            const next = stack.pop()
+            if (current.tag !== token.tagClose) {
+                throw `wat: ${seen + match.index}`
+            }
+            addChild(next, current)
+            current = next
+            i = match.index + match[0].length
+            return
+        }
+        if (token.tagSelfClose !== undefined) {
+            const next = stack.pop()
+            addChild(next, current)
+            current = next
+            i = match.index + match[0].length
+            return
+        }
+        if (token.attrName !== undefined) {
+            current[`_${token.attrName}`] = token.attrValue.slice(1, -1)
+            current["@attr"] = true
+            i = match.index + match[0].length
+            return
+        }
+    }
 
-    return root
+    const self = {
+        chunk: (chunk, end = false) => {
+            xml = remain + chunk
+            i = 0
+            for (const match of xml.matchAll(beeg)) {
+                process(match, end)
+            }
+            seen += chunk.length
+            remain = xml.slice(i)
+        },
+        end: () => {
+            self.chunk("", true)
+            if (remain.trim() !== "") {
+                return new Error("Invalid XML")
+            }
+            if (stack.length !== 0) {
+                return new Error("Invalid XML")
+            }
+            const { __text, "@attr": skip, ...document } = current
+            return document
+        }
+    }
+
+    return self
 }
 
-module.exports = parseXML
+const parseStream = (stream) => new Promise(
+    (resolve) => {
+        const p = parser()
+        stream.on(
+            "data",
+            chunk => p.chunk(
+                chunk.toString("utf8")
+            )
+        )
+        stream.on(
+            "end",
+            () => resolve(p.end())
+        )
+    }
+)
+const parseFile = (filename) => parseStream(
+    fs.createReadStream(filename)
+)
+
+const parse = (xml) => {
+    const p = parser()
+    p.chunk(xml)
+    return p.end()
+}
+
+export default { parse, parseStream, parseFile }
