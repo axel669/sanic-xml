@@ -5,32 +5,97 @@ A high brow, fast xml parsing library.
 
 ## Installation
 
-With NPM
+With NPM/Yarn/PNPM
 ```bash
-npm i @axel669/sanic-xml
+pnpm i @axel669/sanic-xml
 ```
 
-With Yarn
-```bash
-yarn add @axel669/sanic-xml
-```
+## Core API (Available to Node and Browser)
 
-## API
+### `parse(xml)`
+`(String) -> object|Error`
+Parses an xml string synchronously, and returns either an object or an error
+with information about where the parsing failed.
 
+### `stringify(obj[, options])`
+`(Object[, Object]) -> String`
+
+
+## Node API
+
+### `parse(xml)`
+`(String) -> object|Error`
+Parses an xml string synchronously, and returns either an object or an error
+with information about where the parsing failed.
+
+### `parseStream(stream)`
+`(Stream) -> Promise<object|Error>`
+Parses a stream that outputs xml returning the same thing as parse.
+`parseStream` will finish when it recieves an `"end"` event from the stream.
+
+### `parseFile(filename)`
+`(String) -> Promise<object|Error>`
+Parses a file by reading the file as a stream and parsing the stream.
+
+### Usage
 ```javascript
-//  bring in both functions
-const sanic = require("@axel669/sanic-xml")
-//  bring in specific functions
-const parseXML = require("@axel669/sanic-xml/parse")
-const toXML = require("@axel669/sanic-xml/stringify")
+import fs from "node:fs"
 
-const xml = fs.readFile("file.xml", "utf8")
+import sanicXML from "@axel669/sanic-xml/node"
 
-const data = sanic.parse(xml)
-console.log( sanic.stringify(data) )
+const xml = fs.readFileSync("file.xml", "utf8")
+
+const data = sanicXML.parse(xml)
+console.log( sanicXML.stringify(data) )
 
 //  minification
 console.log(
-    sanic.stringify(xml, {minify: true})
+    sanicXML.stringify(xml, {minify: true})
+)
+
+console.log(
+    await sanicXML.parseStream(
+        fs.createReadStream("large.xml")
+    )
+)
+
+console.log(
+    await sanicXML.parseFile("biggest.xml")
+)
+```
+
+## Browser API
+
+### `parseStream(stream)`
+`(ReadableStream) -> Promise<object|Error>`
+Parses a stream that outputs xml returning the same thing as parse. Takes the
+given stream and pipes into a TextDecoderStream for utf8.
+
+### `parseURL(url)`
+`(String) -> Promise<object|Error>`
+Fetches and parses xml from a url. Uses the streaming API to read the loaded
+content so the content size can be quite large.
+
+### Usage
+```javascript
+import sanicXML from "@axel669/sanic-xml"
+
+const response = await fetch("file.xml")
+const xml = await response.text()
+const data = sanicXML.parse(xml)
+console.log( sanicXML.stringify(data) )
+
+//  minification
+console.log(
+    sanicXML.stringify(xml, {minify: true})
+)
+
+const streamResponse = await fetch("large.xml")
+console.log(
+    await sanicXML.parseStream(streamResponse)
+)
+
+console.log(
+    await sanicXML.parseURL("biggest.xml")
 )
 ```
