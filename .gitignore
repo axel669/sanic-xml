@@ -4,3 +4,5 @@ node_modules/
 .vscode/
 
 .wrangler/
+
+tests/files/huge.xml
