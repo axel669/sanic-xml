@@ -1,4 +1,4 @@
-import parse from "./parse.js"
-import stringify from "./stringify.js"
+import * as parse from "./lib/parse.js"
+import * as stringify from "./lib/stringify.js"
 
 export default { ...parse, ...stringify }
