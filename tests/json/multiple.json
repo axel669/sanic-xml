@@ -1,0 +1,25 @@
+{
+    "?xml": {
+        "_version": "1.0",
+        "_standalone": "yes"
+    },
+    "soap:Envelope": {
+        "_xmlns:soap": "http://schemas.xmlsoap.org/soap/envelope/",
+        "soap:Body": {
+            "rpt:loadReportFileResponseElem": {
+                "_xmlns:s": "http://bus.x.com/common/support/v1",
+                "_xmlns:rpt": "http://bus.x.com/service/statement/v1",
+                "s:code": "0",
+                "s:responseTime": "2588",
+                "s:responseDbTime": "1893",
+                "s:requestId": "6b408fd09eb211e7a0807e34820340ec",
+                "s:route": "172.16.x.x:9192",
+                "rpt:result": {
+                    "rpt:file": {
+                        "__cdata": "\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <rpt:loadReportFileResponseElem\n                xmlns:s=\"http://bus.x.com/common/support/v1\" xmlns:rpt=\"http://bus.x.com/service/statement/v1\">\n            <s:code>0</s:code>\n            <s:responseTime>2588</s:responseTime>\n            <s:responseDbTime>1893</s:responseDbTime>\n            <s:requestId>6b408fd09eb211e7a0807e34820340ec</s:requestId>\n            <s:route>172.16.x.x: 9192</s:route>\n  <rpt:result>\n <rpt:file></rpt:file>\n            </rpt:result>\n        </rpt:loadReportFileResponseElem>\n    </soap:Body>\n</soap:Envelope>\n"
+                    }
+                }
+            }
+        }
+    }
+}
