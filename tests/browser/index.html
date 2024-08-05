@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+    <head>
+        <meta name="viewport" content="initial-scale=1,maximum-scale=5,minimum-scale=1,width=device-width">
+        <title>Sanic XML Browser Testing</title>
+    </head>
+    <body ws-x="@@theme:tron">
+        <script src="https://cdn.jsdelivr.net/npm/@axel669/windstorm@0.4.5/dist/browser.js"></script>
+        <script type="module">
+            import http from "https://esm.sh/@axel669/http/browser"
+            import sanicXML from "./browser.js"
+
+            const simple = await http.get({
+                url: "empty-header.xml",
+                resType: "text",
+            })
+            console.log(
+                sanicXML.parse(simple.data)
+            )
+
+            const res = await fetch("multiple.xml")
+            console.time("smol")
+            console.log(
+                await sanicXML.parseStream(res.body)
+            )
+            console.timeEnd("smol")
+
+            console.time("large")
+            const large = await sanicXML.parseURL("large.xml")
+            console.timeEnd("large")
+            console.log(large)
+
+            console.time("huge")
+            const huge = await sanicXML.parseURL("huge.xml")
+            console.timeEnd("huge")
+            console.log(huge)
+        </script>
+    </body>
+</html>
