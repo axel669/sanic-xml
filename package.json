@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "aegis tests/**/*.test.js"
   },
   "repository": {
     "type": "git",
@@ -20,5 +20,13 @@
   "bugs": {
     "url": "https://github.com/axel669/sanic-xml/issues"
   },
-  "homepage": "https://github.com/axel669/sanic-xml#readme"
+  "homepage": "https://github.com/axel669/sanic-xml#readme",
+  "exports": {
+    ".": "./lib/browser.js",
+    "./node": "./lib/node.js"
+  },
+  "devDependencies": {
+    "@axel669/aegis": "^0.2.7",
+    "tinybench": "^2.9.0"
+  }
 }
