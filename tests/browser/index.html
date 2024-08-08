@@ -8,7 +8,7 @@
         <script src="https://cdn.jsdelivr.net/npm/@axel669/windstorm@0.4.5/dist/browser.js"></script>
         <script type="module">
             import http from "https://esm.sh/@axel669/http/browser"
-            import sanicXML from "./browser.js"
+            import sanicXML from "./main.js"
 
             const simple = await http.get({
                 url: "empty-header.xml",
@@ -29,11 +29,6 @@
             const large = await sanicXML.parseURL("large.xml")
             console.timeEnd("large")
             console.log(large)
-
-            console.time("huge")
-            const huge = await sanicXML.parseURL("huge.xml")
-            console.timeEnd("huge")
-            console.log(huge)
         </script>
     </body>
 </html>
