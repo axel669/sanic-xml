@@ -1,6 +1,6 @@
 {
   "name": "@axel669/sanic-xml",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A high brow, fast xml parsing library.",
   "main": "index.js",
   "type": "module",
