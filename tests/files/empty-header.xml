@@ -1,2 +1,6 @@
 <?xml ?>
-<div>hi</div>
+<div>
+    hi
+    <split>something</split>
+    another
+</div>
