@@ -7,6 +7,9 @@
   "scripts": {
     "test": "aegis tests/**/*.test.js"
   },
+  "bin": {
+    "sanic-xml": "./lib/cli.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/axel669/sanic-xml.git"
@@ -22,7 +25,7 @@
   },
   "homepage": "https://github.com/axel669/sanic-xml#readme",
   "exports": {
-    ".": "./lib/browser.js",
+    ".": "./lib/main.js",
     "./node": "./lib/node.js"
   },
   "devDependencies": {
