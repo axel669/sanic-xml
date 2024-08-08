@@ -12,8 +12,9 @@ pnpm i @axel669/sanic-xml
 
 In Browser (no installs)
 ```js
-import sanicXML from "https://esm.sh/@axel669/sanicXML"
+import sanicXML from "https://esm.sh/@axel669/sanic-xml"
 ```
+[Online Playground](https://sanic-xml-playground.axel669.net)
 
 ## Core API (Available in all JS environments)
 These functions are part of the default export and use the web standard objects
