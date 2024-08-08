@@ -10,6 +10,11 @@ With NPM/Yarn/PNPM
 pnpm i @axel669/sanic-xml
 ```
 
+In Browser (no installs)
+```js
+import sanicXML from "https://esm.sh/@axel669/sanicXML"
+```
+
 ## Core API (Available in all JS environments)
 These functions are part of the default export and use the web standard objects
 that are available in browsers, node (18+), and Cloudflare workers.
