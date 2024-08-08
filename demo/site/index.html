@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+    <head>
+        <meta name="viewport" content="initial-scale=1,maximum-scale=5,minimum-scale=1,width=device-width" />
+        <title>Sanic XML Playground</title>
+        <link rel="icon" type="image/png" href="https://axel669.net/images/bots/shion-avatar.png" />
+
+        <meta property="og:title" content="Sanic XML Playground" />
+        <meta property="og:description" content="Online playground for sanic-xml" />
+        <meta property="og:image" content="https://axel669.net/images/bots/shion-avatar.png" />
+        <meta name="theme-color" content="#00EEEE" />
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/codemirror.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/theme/base16-dark.min.css" />
+    </head>
+    <body ws-x="@@theme:tron @@app">
+        <script src="https://cdn.jsdelivr.net/npm/@axel669/windstorm@0.4.5/dist/browser.js"></script>
+
+        <style>
+            textarea {
+                resize: none;
+                white-space: pre;
+            }
+            div.CodeMirror {
+                grid-area: control;
+                height: 100%;
+                font-size: 14px;
+            }
+        </style>
+
+        <ws-screen ws-x="[@width 100%]">
+            <ws-paper ws-x="[$outline] [r 0px] [$color @primary]">
+                <ws-titlebar ws-x="[$header]">
+                    <span ws-x="[$title] [$title-text] [$color @primary] [$fill]">
+                        Sanic XML Playground
+                    </span>
+
+                    <a ws-x="@@button [$flat] [$action]" href="https://github.com/axel669/sanic-xml" target="_blank">
+                        <ws-icon class="bi-github"></ws-icon>
+                    </a>
+                </ws-titlebar>
+
+                <ws-grid ws-x="[$content] [p 2px] [gr.rows 1fr 44px 1fr]">
+                    <div ws-x="[grid] [over hidden]">
+                        <label ws-x="@@control [$color @secondary] [h 100%]">
+                            <span ws-x="[$label]">XML</span>
+                            <textarea id="xml" ws-x="[bg transparent] [t.c white]"></textarea>
+                        </label>
+                    </div>
+                    <ws-grid ws-x="[gr.cols 1fr 1fr]">
+                        <button ws-x="[$fill] [$color @secondary]" id="xml2json">
+                            XML -> JSON
+                        </button>
+                        <button ws-x="[$fill] [$color @accent]" disabled id="json2xml">
+                            JSON -> XML
+                        </button>
+                    </ws-grid>
+                    <div ws-x="[grid] [over hidden]">
+                        <label ws-x="@@control [$color @accent] [h 100%]">
+                            <span ws-x="[$label]">JSON</span>
+                            <textarea id="json" ws-x="[bg transparent] [t.c white]"></textarea>
+                        </label>
+                    </div>
+                </ws-grid>
+            </ws-paper>
+        </ws-screen>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/codemirror.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/xml/xml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/javascript/javascript.min.js"></script>
+        <script type="module">
+            import sanicXML from "https://esm.sh/@axel669/sanic-xml@0.3.0"
+
+            const xml = CodeMirror.fromTextArea(
+                document.querySelector("#xml"),
+                { lineNumbers: true, theme: "base16-dark", mode: "xml" }
+            )
+            const json = CodeMirror.fromTextArea(
+                document.querySelector("#json"),
+                { lineNumbers: true, theme: "base16-dark", mode: "javascript" }
+            )
+            document.querySelector("#xml2json").addEventListener(
+                "click",
+                () => json.setValue(
+                    JSON.stringify(
+                        sanicXML.parse(xml.getValue()),
+                        null,
+                        2
+                    )
+                )
+            )
+        </script>
+    </body>
+</html>
