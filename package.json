@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "aegis tests/**/*.test.js",
+    "test": "aegis tests/**/*.test.js tests/test.setup.js",
     "bench": "node tests/benchmark.js"
   },
   "bin": {

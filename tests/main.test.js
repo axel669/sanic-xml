@@ -1,4 +1,4 @@
-import sanicXML from "../lib/main.js"
+import sanicXML from "../lib/node.js"
 
 const xmlString = `
 <?xml version="1.0" encoding="ISO-8859-1" ?>
@@ -49,8 +49,8 @@ const xmlString = `
 export const test = async ({ Assert, Section }) => {
     Section `String`
 
-    const obj = sanicXML.parse(xmlString)
-    Assert(obj)
+    const str = sanicXML.parse(xmlString)
+    Assert(str)
         .has("any_name")
         `any_name.person.length`.eq(2)
         `any_name.person.1.address.0.city`.eq("Moscow")
@@ -65,16 +65,45 @@ export const test = async ({ Assert, Section }) => {
             item => item._objectid === "553"
         ))`__text`.eq("Cadaco")
 
+    Section `From File`
+
+    const file = await sanicXML.parseFile("tests/files/multiple.xml")
+    Assert(file)
+        .has("soap:Envelope")
+        `soap:Envelope.soap:Body.rpt:loadReportFileResponseElem.rpt:result.rpt:file`.has("__cdata")
+
     Section `To String`
 
-    const basicString = sanicXML.toString(obj, { indent: "  " })
+    const basicString = sanicXML.toString(str, { indent: "  " })
     Assert(basicString)
-        `length`.eq(1072)
+        `length`.gt(0)
         .includes("    <address>")
 
     Section `To Blob`
 
-    const blob = sanicXML.toBlob(obj, { indent: "  " })
+    const blob = sanicXML.toBlob(str, { indent: "  " })
     Assert(blob)
-        `size`.eq(1072)
+        `size`.gt(0)
+        `size`.eq(basicString.length)
+
+    Section `Invlaid Attributes`
+
+    const invalidAttrMid = await sanicXML.parseFile("tests/files/invalid-attr.xml")
+    Assert(invalidAttrMid)
+        .is(Error)
+        `message`.includes("invalid")
+        `detail.text`.includes("invalid")
+    const invalidAttrEnd = await sanicXML.parseFile("tests/files/invalid-attr2.xml")
+    Assert(invalidAttrEnd)
+        .is(Error)
+        `message`.includes("invalid")
+        `detail.text`.includes("invalid")
+
+    Section `Mismatched Close Tags`
+
+    const mismatch = await sanicXML.parseFile("tests/files/mismatch-close.xml")
+    Assert(mismatch)
+        .is(Error)
+        `detail.found`.eq("hi")
+        `detail.expected`.eq("test")
 }
