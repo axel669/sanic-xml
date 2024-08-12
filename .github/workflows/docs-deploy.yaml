@@ -20,4 +20,5 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: demo
+          wranglerVersion: "3.69.0"
           command: pages deploy --branch dev
